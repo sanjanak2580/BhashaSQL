@@ -1,747 +1,842 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BhashaQL - Hinglish SQL Compiler</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-        
-        header {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-            padding: 30px;
-            text-align: center;
-        }
-        
-        header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-        
-        header p {
-            font-size: 1.2em;
-            opacity: 0.9;
-        }
-        
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            padding: 30px;
-        }
-        
-        .input-section, .output-section {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 20px;
-        }
-        
-        .section-title {
-            font-size: 1.3em;
-            font-weight: 600;
-            margin-bottom: 15px;
-            color: #333;
-        }
-        
-        .query-input {
-            width: 100%;
-            min-height: 200px;
-            padding: 15px;
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            resize: vertical;
-            transition: border-color 0.3s;
-        }
-        
-        .query-input:focus {
-            outline: none;
-            border-color: #4facfe;
-        }
-        
-        .button-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-        
-        button {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 14px;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
-        }
-        
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
-        
-        .btn-secondary:hover {
-            background: #5a6268;
-        }
-        
-        .btn-example {
-            background: #28a745;
-            color: white;
-        }
-        
-        .btn-example:hover {
-            background: #218838;
-        }
-        
-        .output-area {
-            background: white;
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            padding: 15px;
-            min-height: 200px;
-            max-height: 400px;
-            overflow-y: auto;
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
-            white-space: pre-wrap;
-        }
-        
-        .success {
-            color: #28a745;
-            font-weight: 600;
-        }
-        
-        .error {
-            color: #dc3545;
-            font-weight: 600;
-        }
-        
-        .warning {
-            color: #ffc107;
-            font-weight: 600;
-        }
-        
-        .result-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-        
-        .result-table th,
-        .result-table td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        
-        .result-table th {
-            background-color: #f2f2f2;
-            font-weight: 600;
-        }
-        
-        .examples {
-            margin-top: 20px;
-            padding: 15px;
-            background: #e9ecef;
-            border-radius: 8px;
-        }
-        
-        .examples h3 {
-            margin-bottom: 10px;
-            color: #333;
-        }
-        
-        .example-item {
-            background: white;
-            padding: 10px;
-            margin: 5px 0;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background 0.3s;
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-        }
-        
-        .example-item:hover {
-            background: #f8f9fa;
-        }
-        
-        .tabs {
-            display: flex;
-            border-bottom: 2px solid #e9ecef;
-            margin-bottom: 15px;
-        }
-        
-        .tab {
-            padding: 10px 20px;
-            cursor: pointer;
-            border-bottom: 2px solid transparent;
-            transition: all 0.3s;
-        }
-        
-        .tab.active {
-            border-bottom-color: #4facfe;
-            color: #4facfe;
-            font-weight: 600;
-        }
-        
-        .tab-content {
-            display: none;
-        }
-        
-        .tab-content.active {
-            display: block;
-        }
-        
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
-        }
-        
-        .stat-card {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-            border: 2px solid #e9ecef;
-        }
-        
-        .stat-value {
-            font-size: 1.5em;
-            font-weight: 700;
-            color: #4facfe;
-        }
-        
-        .stat-label {
-            font-size: 0.9em;
-            color: #666;
-            margin-top: 5px;
-        }
-        
-        @media (max-width: 768px) {
-            .main-content {
-                grid-template-columns: 1fr;
-            }
-            
-            header h1 {
-                font-size: 2em;
-            }
-        }
-        
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 20px;
-        }
-        
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #4facfe;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 10px;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>BhashaQL — Hinglish SQL Compiler</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:            #10101a;
+    --bg-raised:     #171826;
+    --bg-inset:      #0c0c14;
+    --panel-line:    #272839;
+    --panel-line-soft:#1e1f2e;
+    --text-hi:       #edeef6;
+    --text-mid:      #a7a8bd;
+    --text-low:      #6c6d84;
+    --amber:         #eba53c;
+    --amber-dim:     #7a5a26;
+    --teal:          #55d6a8;
+    --teal-dim:      #235542;
+    --rose:          #ef6f79;
+    --rose-dim:      #5c2b30;
+    --focus:         #eba53c;
+    --font-display:  'Fraunces', Georgia, serif;
+    --font-ui:       'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono:     'JetBrains Mono', 'Courier New', monospace;
+    --radius-sm: 5px;
+    --radius-md: 8px;
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; }
+
+  html,body{ height:100%; }
+
+  body{
+    font-family: var(--font-ui);
+    background: var(--bg);
+    color: var(--text-hi);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a{ color: inherit; }
+
+  :focus-visible{
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+    border-radius: 3px;
+  }
+
+  .sr-only{
+    position:absolute; width:1px; height:1px;
+    padding:0; margin:-1px; overflow:hidden;
+    clip:rect(0,0,0,0); white-space:nowrap; border:0;
+  }
+
+  .shell{
+    max-width: 1320px;
+    margin: 0 auto;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ---------- Toolbar ---------- */
+  .toolbar{
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--panel-line);
+    background: var(--bg);
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+
+  .brand{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-right: auto;
+  }
+
+  .brand-mark{
+    width: 30px; height: 30px;
+    border-radius: 7px;
+    background: linear-gradient(160deg, var(--amber), #c97f22);
+    display: flex; align-items: center; justify-content: center;
+    color: #1a1206;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+
+  .brand-text h1{
+    font-family: var(--font-display);
+    font-size: 19px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    line-height: 1.1;
+  }
+
+  .brand-text p{
+    font-size: 12px;
+    color: var(--text-low);
+    margin-top: 2px;
+  }
+
+  .toolbar-actions{
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  button{
+    font-family: var(--font-ui);
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 13.5px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 14px;
+    transition: background-color .15s ease, border-color .15s ease, transform .1s ease;
+    background: transparent;
+    color: var(--text-mid);
+  }
+
+  button svg{ width: 15px; height: 15px; flex-shrink: 0; }
+
+  .btn-run{
+    background: var(--amber);
+    color: #1a1206;
+  }
+  .btn-run:hover{ background: #f5b455; }
+  .btn-run:active{ transform: translateY(1px); }
+
+  .btn-ghost{
+    border-color: var(--panel-line);
+    color: var(--text-mid);
+  }
+  .btn-ghost:hover{
+    border-color: #3a3c54;
+    color: var(--text-hi);
+    background: var(--bg-raised);
+  }
+
+  .btn-ghost[aria-pressed="true"]{
+    color: var(--amber);
+    border-color: var(--amber-dim);
+    background: rgba(235,165,60,0.08);
+  }
+
+  /* ---------- Examples drawer ---------- */
+  .examples-drawer{
+    border-bottom: 1px solid var(--panel-line);
+    background: var(--bg-raised);
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height .22s ease;
+  }
+  .examples-drawer.open{ max-height: 260px; }
+
+  .examples-inner{
+    padding: 16px 24px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 8px;
+  }
+
+  .example-chip{
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--text-mid);
+    background: var(--bg-inset);
+    border: 1px solid var(--panel-line-soft);
+    border-radius: var(--radius-sm);
+    padding: 9px 11px;
+    cursor: pointer;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: border-color .15s ease, color .15s ease;
+  }
+  .example-chip:hover{ border-color: var(--amber-dim); color: var(--text-hi); }
+
+  /* ---------- Main split ---------- */
+  .workspace{
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 0;
+  }
+
+  .pane{
+    display: flex;
+    flex-direction: column;
+    min-height: 420px;
+  }
+
+  .pane + .pane{ border-left: 1px solid var(--panel-line); }
+
+  .pane-head{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--panel-line);
+    background: var(--bg-raised);
+  }
+
+  .pane-title{
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    color: var(--text-low);
+  }
+
+  .pane-hint{
+    font-size: 11.5px;
+    color: var(--text-low);
+    font-family: var(--font-mono);
+  }
+
+  /* editor */
+  .editor{
+    flex: 1;
+    display: flex;
+    background: var(--bg-inset);
+    overflow: hidden;
+  }
+
+  .gutter{
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.65;
+    color: var(--text-low);
+    text-align: right;
+    padding: 16px 10px 16px 14px;
+    user-select: none;
+    background: var(--bg-inset);
+    border-right: 1px solid var(--panel-line-soft);
+    overflow: hidden;
+    white-space: pre;
+    min-width: 40px;
+  }
+
+  #queryInput{
+    flex: 1;
+    resize: none;
+    border: none;
+    background: transparent;
+    color: var(--text-hi);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.65;
+    padding: 16px 16px 16px 12px;
+    tab-size: 2;
+  }
+  #queryInput:focus-visible{ outline: none; }
+  #queryInput::placeholder{ color: var(--text-low); }
+
+  /* output */
+  .tabs{
+    display: flex;
+    gap: 2px;
+    padding: 8px 12px 0;
+    background: var(--bg-raised);
+    border-bottom: 1px solid var(--panel-line);
+  }
+
+  .tab{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-low);
+    padding: 8px 14px;
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    cursor: pointer;
+    border: 1px solid transparent;
+    border-bottom: none;
+  }
+
+  .tab[aria-selected="true"]{
+    color: var(--text-hi);
+    background: var(--bg-inset);
+    border-color: var(--panel-line);
+  }
+
+  .tab-panel{ display: none; flex: 1; overflow-y: auto; background: var(--bg-inset); }
+  .tab-panel.active{ display: block; }
+
+  #output{
+    padding: 16px;
+    font-size: 13.5px;
+    line-height: 1.6;
+  }
+
+  #output .placeholder{ color: var(--text-low); }
+
+  .msg-line{ display: flex; gap: 8px; align-items: flex-start; margin-bottom: 6px; }
+  .msg-line svg{ width: 15px; height: 15px; flex-shrink: 0; margin-top: 2px; }
+  .msg-ok{ color: var(--teal); }
+  .msg-err{ color: var(--rose); }
+  .msg-warn{ color: var(--amber); }
+
+  .result-block{ margin: 14px 0; }
+  .result-block .label{
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--text-low);
+    margin-bottom: 8px;
+  }
+
+  table.result-table{
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+    font-family: var(--font-mono);
+  }
+  table.result-table th,
+  table.result-table td{
+    border: 1px solid var(--panel-line-soft);
+    padding: 7px 10px;
+    text-align: left;
+  }
+  table.result-table th{
+    background: var(--bg-raised);
+    color: var(--text-mid);
+    font-weight: 500;
+  }
+  table.result-table td{ color: var(--text-hi); }
+  table.result-table tr:nth-child(even) td{ background: rgba(255,255,255,0.015); }
+
+  .row-count{
+    display:block;
+    margin-top: 8px;
+    font-size: 11.5px;
+    color: var(--text-low);
+    font-family: var(--font-mono);
+  }
+
+  #sqlOutput{ padding: 16px; font-family: var(--font-mono); font-size: 13px; }
+  #sqlOutput ol{ padding-left: 22px; color: var(--text-mid); }
+  #sqlOutput li{ margin-bottom: 10px; color: var(--text-hi); }
+
+  .stats-grid{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--panel-line-soft);
+  }
+  .stat-card{ background: var(--bg-inset); padding: 20px 16px; text-align: center; }
+  .stat-value{
+    font-family: var(--font-display);
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--amber);
+  }
+  .stat-label{ font-size: 11.5px; color: var(--text-low); margin-top: 4px; }
+
+  .table-list{ padding: 16px; display: flex; flex-direction: column; gap: 6px; }
+  .table-chip{
+    display: flex; align-items: center; gap: 8px;
+    font-family: var(--font-mono); font-size: 13px;
+    color: var(--text-mid);
+    background: var(--bg-raised);
+    border: 1px solid var(--panel-line-soft);
+    border-radius: var(--radius-sm);
+    padding: 9px 12px;
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+  }
+  .table-chip:hover{ border-color: var(--amber-dim); color: var(--text-hi); }
+  .table-chip svg{ width:14px; height:14px; color: var(--text-low); flex-shrink:0; }
+
+  /* ---------- Status bar ---------- */
+  .statusbar{
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 8px 24px;
+    border-top: 1px solid var(--panel-line);
+    background: var(--bg-raised);
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--text-low);
+  }
+  .status-dot{
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--text-low);
+    flex-shrink: 0;
+  }
+  .status-dot.ready{ background: var(--teal); }
+  .status-dot.busy{ background: var(--amber); animation: pulse 1s ease-in-out infinite; }
+  .status-dot.error{ background: var(--rose); }
+  @media (prefers-reduced-motion: reduce){ .status-dot.busy{ animation: none; } }
+  @keyframes pulse{ 50%{ opacity: 0.35; } }
+  .statusbar .sep{ color: var(--panel-line); }
+  .statusbar .grow{ margin-left: auto; }
+
+  .spinner{
+    width: 14px; height: 14px;
+    border: 2px solid var(--panel-line-soft);
+    border-top-color: var(--amber);
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+  }
+  @media (prefers-reduced-motion: reduce){ .spinner{ animation: spin 1.6s linear infinite; } }
+  @keyframes spin{ to{ transform: rotate(360deg); } }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 860px){
+    .workspace{ grid-template-columns: 1fr; }
+    .pane{ min-height: 320px; }
+    .pane + .pane{ border-left: none; border-top: 1px solid var(--panel-line); }
+    .toolbar{ flex-wrap: wrap; }
+    .stats-grid{ grid-template-columns: 1fr; }
+    .statusbar{ flex-wrap: wrap; row-gap: 4px; }
+  }
+</style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>🚀 BhashaQL</h1>
-            <p>Hinglish SQL Compiler - Write SQL in Hinglish!</p>
-        </header>
-        
-        <div class="main-content">
-            <div class="input-section">
-                <h2 class="section-title">📝 Enter BhashaQL Query</h2>
-                <textarea id="queryInput" class="query-input" placeholder="Type your BhashaQL query here...
+<div class="shell">
 
-Examples:
-• banaye table students (id number, name text, age number);
-• laye * se students jahan age > 18;
-• daalen mein students values (1, 'Aman', 20);"></textarea>
-                
-                <div class="button-group">
-                    <button onclick="executeQuery()" class="btn-primary">🔥 Execute Query</button>
-                    <button onclick="clearInput()" class="btn-secondary">🗑️ Clear</button>
-                    <button onclick="showExamples()" class="btn-example">💡 Examples</button>
-                    <button onclick="showTables()" class="btn-example" style="background: #ff6b6b;">📋 Show Tables</button>
-                </div>
-                
-                <div class="examples" id="examples" style="display: none;">
-                    <h3>📚 Example Queries:</h3>
-                    <div class="example-item" onclick="setExample('banaye table employees (id number, name text, department text, salary number);')">
-                        banaye table employees (id number, name text, department text, salary number);
-                    </div>
-                    <div class="example-item" onclick="setExample('daalen mein employees values (1, &quot;Rahul&quot;, &quot;IT&quot;, 50000);')">
-                        daalen mein employees values (1, "Rahul", "IT", 50000);
-                    </div>
-                    <div class="example-item" onclick="setExample('laye * se employees jahan salary &gt; 40000;')">
-                        laye * se employees jahan salary > 40000;
-                    </div>
-                    <div class="example-item" onclick="setExample('badlein employees set karein salary = 60000 jahan department = &quot;IT&quot;;')">
-                        badlein employees set karein salary = 60000 jahan department = "IT";
-                    </div>
-                    <div class="example-item" onclick="setExample('mitayein se employees jahan salary &lt; 30000;')">
-                        mitayein se employees jahan salary < 30000;
-                    </div>
-                    <div class="example-item" onclick="setExample('laye count(*) from employees;')">
-                        laye count(*) from employees;
-                    </div>
-                </div>
-            </div>
-            
-            <div class="output-section">
-                <h2 class="section-title">📊 Results</h2>
-                
-                <div class="loading" id="loading">
-                    <div class="spinner"></div>
-                    <p>Executing query...</p>
-                </div>
-                
-                <div class="tabs">
-                    <div class="tab active" onclick="showTab('results')">Results</div>
-                    <div class="tab" onclick="showTab('sql')">SQL</div>
-                    <div class="tab" onclick="showTab('stats')">Statistics</div>
-                </div>
-                
-                <div id="resultsTab" class="tab-content active">
-                    <div id="output" class="output-area">Results will appear here...</div>
-                </div>
-                
-                <div id="sqlTab" class="tab-content">
-                    <div id="sqlOutput" class="output-area">Generated SQL will appear here...</div>
-                </div>
-                
-                <div id="statsTab" class="tab-content">
-                    <div id="statsOutput" class="stats">
-                        <div class="stat-card">
-                            <div class="stat-value" id="queryCount">0</div>
-                            <div class="stat-label">Queries Executed</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-value" id="executionTime">0s</div>
-                            <div class="stat-label">Execution Time</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-value" id="affectedRows">0</div>
-                            <div class="stat-label">Affected Rows</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+  <header class="toolbar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">भQ</div>
+      <div class="brand-text">
+        <h1>BhashaQL</h1>
+        <p>Hinglish SQL compiler</p>
+      </div>
     </div>
-    
-    <script>
-        let queryCount = 0;
-        
-        function executeQuery() {
-            const query = document.getElementById('queryInput').value.trim();
-            if (!query) {
-                alert('Please enter a BhashaQL query!');
-                return;
-            }
-            
-            const loading = document.getElementById('loading');
-            const output = document.getElementById('output');
-            const sqlOutput = document.getElementById('sqlOutput');
-            
-            loading.style.display = 'block';
-            output.textContent = '';
-            sqlOutput.textContent = '';
-            
-            fetch('http://localhost:5000/api/compile', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ query: query })
-            })
-            .then(response => response.json())
-            .then(data => {
-                loading.style.display = 'none';
-                displayResults(data);
-                displaySQL(data);
-                displayStats(data);
-                queryCount++;
-                
-                // Auto-show table contents after successful operations
-                if (data.success && isTableOperation(query)) {
-                    setTimeout(() => showTableContents(query), 500);
-                }
-            })
-            .catch(error => {
-                loading.style.display = 'none';
-                output.innerHTML = '<span class="error">Network Error: ' + error.message + '</span>';
-            });
+    <div class="toolbar-actions">
+      <button type="button" class="btn-run" onclick="executeQuery()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+        Run query
+      </button>
+      <button type="button" class="btn-ghost" onclick="clearInput()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/></svg>
+        Clear
+      </button>
+      <button type="button" class="btn-ghost" id="examplesToggle" aria-pressed="false" aria-expanded="false" aria-controls="examples" onclick="toggleExamples()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20V2H6.5A2.5 2.5 0 0 0 4 4.5z"/></svg>
+        Examples
+      </button>
+      <button type="button" class="btn-ghost" onclick="showTables()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 10v10"/></svg>
+        Tables
+      </button>
+    </div>
+  </header>
+
+  <div class="examples-drawer" id="examples">
+    <div class="examples-inner" role="list" aria-label="Example queries">
+      <button type="button" class="example-chip" role="listitem" onclick="setExample('banaye table employees (id number, name text, department text, salary number);')">banaye table employees (id number, name text, department text, salary number);</button>
+      <button type="button" class="example-chip" role="listitem" onclick="setExample('daalen mein employees values (1, &quot;Rahul&quot;, &quot;IT&quot;, 50000);')">daalen mein employees values (1, "Rahul", "IT", 50000);</button>
+      <button type="button" class="example-chip" role="listitem" onclick="setExample('laye * se employees jahan salary &gt; 40000;')">laye * se employees jahan salary &gt; 40000;</button>
+      <button type="button" class="example-chip" role="listitem" onclick="setExample('badlein employees set karein salary = 60000 jahan department = &quot;IT&quot;;')">badlein employees set karein salary = 60000 jahan department = "IT";</button>
+      <button type="button" class="example-chip" role="listitem" onclick="setExample('mitayein se employees jahan salary &lt; 30000;')">mitayein se employees jahan salary &lt; 30000;</button>
+      <button type="button" class="example-chip" role="listitem" onclick="setExample('laye count(*) from employees;')">laye count(*) from employees;</button>
+    </div>
+  </div>
+
+  <main class="workspace">
+    <section class="pane" aria-labelledby="editorLabel">
+      <div class="pane-head">
+        <span class="pane-title" id="editorLabel">QUERY</span>
+        <span class="pane-hint">Ctrl + Enter to run</span>
+      </div>
+      <label for="queryInput" class="sr-only">BhashaQL query input</label>
+      <div class="editor">
+        <div class="gutter" id="gutter" aria-hidden="true">1</div>
+        <textarea id="queryInput" spellcheck="false" placeholder="banaye table students (id number, name text, age number);&#10;laye * se students jahan age > 18;&#10;daalen mein students values (1, 'Aman', 20);"></textarea>
+      </div>
+    </section>
+
+    <section class="pane" aria-labelledby="outputLabel">
+      <div class="tabs" role="tablist" aria-label="Output views">
+        <button type="button" class="tab" id="tab-results" role="tab" aria-selected="true" aria-controls="resultsTab" onclick="showTab(event,'results')">Results</button>
+        <button type="button" class="tab" id="tab-sql" role="tab" aria-selected="false" aria-controls="sqlTab" onclick="showTab(event,'sql')">SQL</button>
+        <button type="button" class="tab" id="tab-stats" role="tab" aria-selected="false" aria-controls="statsTab" onclick="showTab(event,'stats')">Statistics</button>
+      </div>
+
+      <div id="resultsTab" class="tab-panel active" role="tabpanel" aria-labelledby="tab-results">
+        <div id="output" aria-live="polite"><span class="placeholder">Run a query to see results here.</span></div>
+      </div>
+
+      <div id="sqlTab" class="tab-panel" role="tabpanel" aria-labelledby="tab-sql">
+        <div id="sqlOutput"><span class="placeholder">Compiled SQL will appear here.</span></div>
+      </div>
+
+      <div id="statsTab" class="tab-panel" role="tabpanel" aria-labelledby="tab-stats">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="queryCount">0</div>
+            <div class="stat-label">Queries run</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="executionTime">0.000s</div>
+            <div class="stat-label">Last execution time</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="affectedRows">0</div>
+            <div class="stat-label">Affected rows</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="statusbar">
+    <span id="statusIndicator" style="display:flex;align-items:center;gap:6px;">
+      <span class="status-dot ready" id="statusDot"></span>
+      <span id="statusText">Ready</span>
+    </span>
+    <span class="sep">|</span>
+    <span id="cursorPos">Ln 1, Col 1</span>
+    <span class="sep">|</span>
+    <span id="statusQueries">0 queries run</span>
+    <span class="grow"></span>
+    <span id="statusTime"></span>
+  </footer>
+</div>
+
+<script>
+  const CONFIG = { API_BASE: 'http://localhost:5000/api' };
+  let queryCount = 0;
+
+  // ---------- utilities ----------
+  function escapeHtml(str){
+    if (str === null || str === undefined) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function cellValue(row, col){
+    const v = row[col];
+    return (v === null || v === undefined) ? '' : v;
+  }
+
+  const ICONS = {
+    check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>',
+    x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>',
+    warn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>',
+    table: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 10v10"/></svg>'
+  };
+
+  // ---------- gutter / cursor ----------
+  const queryInput = document.getElementById('queryInput');
+  const gutter = document.getElementById('gutter');
+  const cursorPos = document.getElementById('cursorPos');
+
+  function syncGutter(){
+    const lines = queryInput.value.split('\n').length;
+    let out = '';
+    for (let i = 1; i <= lines; i++) out += i + '\n';
+    gutter.textContent = out.trim();
+    gutter.style.height = queryInput.scrollHeight + 'px';
+  }
+
+  function syncCursor(){
+    const value = queryInput.value.slice(0, queryInput.selectionStart);
+    const lines = value.split('\n');
+    const line = lines.length;
+    const col = lines[lines.length - 1].length + 1;
+    cursorPos.textContent = 'Ln ' + line + ', Col ' + col;
+  }
+
+  queryInput.addEventListener('input', syncGutter);
+  queryInput.addEventListener('scroll', () => { gutter.scrollTop = queryInput.scrollTop; });
+  queryInput.addEventListener('keyup', syncCursor);
+  queryInput.addEventListener('click', syncCursor);
+  queryInput.addEventListener('keydown', function(e){
+    if (e.ctrlKey && e.key === 'Enter') executeQuery();
+  });
+  syncGutter();
+  syncCursor();
+
+  // ---------- status bar ----------
+  function setStatus(state, label){
+    const dot = document.getElementById('statusDot');
+    const text = document.getElementById('statusText');
+    dot.className = 'status-dot ' + state;
+    text.textContent = label;
+  }
+
+  // ---------- core compile call ----------
+  function compile(query){
+    return fetch(CONFIG.API_BASE + '/compile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query })
+    }).then(r => r.json());
+  }
+
+  function executeQuery(){
+    const query = queryInput.value.trim();
+    if (!query){
+      setStatus('error', 'Enter a query first');
+      queryInput.focus();
+      return;
+    }
+
+    setStatus('busy', 'Running…');
+    document.getElementById('output').innerHTML = '<span class="placeholder">Running…</span>';
+    document.getElementById('sqlOutput').innerHTML = '<span class="placeholder">Running…</span>';
+
+    compile(query)
+      .then(data => {
+        queryCount++;
+        displayResults(data);
+        displaySQL(data);
+        displayStats(data);
+        setStatus(data.success ? 'ready' : 'error', data.success ? 'Ready' : 'Query failed');
+
+        if (data.success && isTableOperation(query)){
+          const tableName = extractTableName(query);
+          if (tableName) setTimeout(() => appendTablePreview(tableName), 400);
         }
-        
-        function isTableOperation(query) {
-            const lowerQuery = query.toLowerCase().trim();
-            return lowerQuery.includes('banaye table') || 
-                   lowerQuery.includes('daalen mein') || 
-                   lowerQuery.includes('badlein') || 
-                   lowerQuery.includes('mitayein se');
+      })
+      .catch(error => {
+        setStatus('error', 'Connection failed');
+        document.getElementById('output').innerHTML =
+          '<div class="msg-line msg-err">' + ICONS.x + '<span>Network error: could not reach the BhashaQL server. ' + escapeHtml(error.message) + '</span></div>' +
+          '<div class="msg-line" style="color:var(--text-low)">Make sure the backend is running on port 5000.</div>';
+      });
+  }
+
+  function isTableOperation(query){
+    const q = query.toLowerCase();
+    return q.includes('banaye table') || q.includes('daalen mein') ||
+           q.includes('badlein') || q.includes('mitayein se');
+  }
+
+  function extractTableName(query){
+    const patterns = [
+      /banaye\s+table\s+(\w+)/i,
+      /daalen\s+mein\s+(\w+)/i,
+      /badlein\s+(\w+)/i,
+      /mitayein\s+se\s+(\w+)/i
+    ];
+    for (const p of patterns){
+      const m = query.match(p);
+      if (m) return m[1];
+    }
+    return null;
+  }
+
+  function renderResultTable(result){
+    if (!result.data || result.data.length === 0){
+      return '<span class="placeholder">No rows.</span>';
+    }
+    let html = '<table class="result-table"><tr>';
+    result.columns.forEach(col => { html += '<th>' + escapeHtml(col) + '</th>'; });
+    html += '</tr>';
+    result.data.forEach(row => {
+      html += '<tr>';
+      result.columns.forEach(col => { html += '<td>' + escapeHtml(cellValue(row, col)) + '</td>'; });
+      html += '</tr>';
+    });
+    html += '</table><span class="row-count">' + (result.row_count ?? result.data.length) + ' row(s)</span>';
+    return html;
+  }
+
+  // ---------- shared "show a table's contents" ----------
+  function renderTableContents(tableName, targetEl){
+    return compile('laye * se ' + tableName + ';').then(data => {
+      let html = '<div class="result-block"><div class="label">' + escapeHtml(tableName) + '</div>';
+      if (data.success && data.results && data.results.length > 0){
+        html += renderResultTable(data.results[0]);
+      } else {
+        html += '<span class="placeholder">Could not read this table.</span>';
+      }
+      html += '</div>';
+      targetEl.innerHTML += html;
+      return data;
+    });
+  }
+
+  function appendTablePreview(tableName){
+    renderTableContents(tableName, document.getElementById('output'))
+      .catch(() => { /* silent — this is a best-effort preview */ });
+  }
+
+  function showTableContents(tableName){
+    setStatus('busy', 'Loading table…');
+    const output = document.getElementById('output');
+    output.innerHTML = '';
+    showTab(null, 'results');
+    renderTableContents(tableName, output)
+      .then(() => setStatus('ready', 'Ready'))
+      .catch(() => {
+        setStatus('error', 'Could not load table');
+        output.innerHTML = '<div class="msg-line msg-err">' + ICONS.x + '<span>Could not fetch contents for ' + escapeHtml(tableName) + '.</span></div>';
+      });
+  }
+
+  function showTables(){
+    setStatus('busy', 'Loading tables…');
+    const output = document.getElementById('output');
+    output.innerHTML = '<span class="placeholder">Loading tables…</span>';
+    showTab(null, 'results');
+
+    fetch(CONFIG.API_BASE + '/tables')
+      .then(r => r.json())
+      .then(data => {
+        setStatus('ready', 'Ready');
+        if (data.success && data.tables && data.tables.length > 0){
+          let html = '<div class="table-list">';
+          data.tables.forEach(t => {
+            const safe = escapeHtml(t);
+            html += '<button type="button" class="table-chip" onclick="showTableContents(\'' + safe.replace(/'/g, "\\'") + '\')">' + ICONS.table + safe + '</button>';
+          });
+          html += '</div>';
+          output.innerHTML = html;
+        } else if (data.success){
+          output.innerHTML = '<div style="padding:16px"><span class="placeholder">No tables yet — try:</span><br><br>' +
+            '<code style="font-family:var(--font-mono);color:var(--text-mid)">banaye table students (id number, name text);</code></div>';
+        } else {
+          output.innerHTML = '<div class="msg-line msg-err">' + ICONS.x + '<span>Could not fetch tables' + (data.error ? ': ' + escapeHtml(data.error) : '.') + '</span></div>';
         }
-        
-        function showTableContents(lastQuery) {
-            const output = document.getElementById('output');
-            
-            // Extract table name from the last query
-            let tableName = extractTableName(lastQuery);
-            if (!tableName) {
-                // If we can't extract table name, show all tables
-                showAllTables();
-                return;
-            }
-            
-            // Try to show table contents
-            const selectQuery = 'laye * se ' + tableName + ';';
-            
-            fetch('http://localhost:5000/api/compile', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ query: selectQuery })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success && data.results.length > 0) {
-                    let tableHtml = '<br><strong>📊 Current Table Contents:</strong><br><br>';
-                    const result = data.results[0];
-                    
-                    if (result.data && result.data.length > 0) {
-                        tableHtml += '<table class="result-table">';
-                        tableHtml += '<tr>';
-                        result.columns.forEach(col => {
-                            tableHtml += '<th>' + col + '</th>';
-                        });
-                        tableHtml += '</tr>';
-                        
-                        result.data.forEach(row => {
-                            tableHtml += '<tr>';
-                            result.columns.forEach(col => {
-                                tableHtml += '<td>' + (row[col] || '') + '</td>';
-                            });
-                            tableHtml += '</tr>';
-                        });
-                        tableHtml += '</table>';
-                        tableHtml += '<small>Rows: ' + result.row_count + '</small>';
-                    } else {
-                        tableHtml += '<em>Table is empty</em>';
-                    }
-                    
-                    output.innerHTML += tableHtml;
-                } else {
-                    // If select fails, show table list
-                    showAllTables();
-                }
-            })
-            .catch(error => {
-                console.log('Could not show table contents:', error);
-            });
-        }
-        
-        function extractTableName(query) {
-            const lowerQuery = query.toLowerCase().trim();
-            
-            // Extract table name from different operations
-            if (lowerQuery.includes('banaye table')) {
-                const match = query.match(/banaye\s+table\s+(\w+)/i);
-                return match ? match[1] : null;
-            }
-            
-            if (lowerQuery.includes('daalen mein')) {
-                const match = query.match(/daalen\s+mein\s+(\w+)/i);
-                return match ? match[1] : null;
-            }
-            
-            if (lowerQuery.includes('badlein')) {
-                const match = query.match(/badlein\s+(\w+)/i);
-                return match ? match[1] : null;
-            }
-            
-            if (lowerQuery.includes('mitayein se')) {
-                const match = query.match(/mitayein\s+se\s+(\w+)/i);
-                return match ? match[1] : null;
-            }
-            
-            return null;
-        }
-        
-        function showAllTables() {
-            fetch('http://localhost:5000/api/tables')
-            .then(response => response.json())
-            .then(data => {
-                const output = document.getElementById('output');
-                let html = '<br><strong>📋 Available Tables:</strong><br><br>';
-                
-                if (data.success && data.tables.length > 0) {
-                    data.tables.forEach(table => {
-                        html += `🗂️ ${table}<br>`;
-                    });
-                } else {
-                    html += 'No tables found.';
-                }
-                
-                output.innerHTML += html;
-            })
-            .catch(error => {
-                console.log('Could not show tables:', error);
-            });
-        }
-        
-        function displayResults(data) {
-            const output = document.getElementById('output');
-            let html = '';
-            
-            if (data.success) {
-                html += '<span class="success">✅ ' + data.message + '</span><br><br>';
-                
-                if (data.results && data.results.length > 0) {
-                    data.results.forEach((result, index) => {
-                        html += '<strong>Query ' + (index + 1) + ':</strong> ' + result.message + '<br>';
-                        
-                        if (result.data && result.data.length > 0) {
-                            html += '<table class="result-table">';
-                            html += '<tr>';
-                            result.columns.forEach(col => {
-                                html += '<th>' + col + '</th>';
-                            });
-                            html += '</tr>';
-                            
-                            result.data.forEach(row => {
-                                html += '<tr>';
-                                result.columns.forEach(col => {
-                                    html += '<td>' + (row[col] || '') + '</td>';
-                                });
-                                html += '</tr>';
-                            });
-                            html += '</table>';
-                            html += '<small>Rows returned: ' + result.row_count + '</small><br><br>';
-                        } else {
-                            html += '<small>Affected rows: ' + result.affected_rows + '</small><br><br>';
-                        }
-                    });
-                }
-            } else {
-                html += '<span class="error">❌ Query failed</span><br><br>';
-            }
-            
-            if (data.errors && data.errors.length > 0) {
-                html += '<strong>Errors:</strong><br>';
-                data.errors.forEach(error => {
-                    html += '<span class="error">• ' + error + '</span><br>';
-                });
-                html += '<br>';
-            }
-            
-            if (data.warnings && data.warnings.length > 0) {
-                html += '<strong>Warnings:</strong><br>';
-                data.warnings.forEach(warning => {
-                    html += '<span class="warning">• ' + warning + '</span><br>';
-                });
-            }
-            
-            output.innerHTML = html;
-        }
-        
-        function displaySQL(data) {
-            const sqlOutput = document.getElementById('sqlOutput');
-            if (data.sql_statements && data.sql_statements.length > 0) {
-                let sql = '<strong>Generated SQL:</strong><br><br>';
-                data.sql_statements.forEach((statement, index) => {
-                    sql += (index + 1) + '. ' + statement + ';<br><br>';
-                });
-                sqlOutput.innerHTML = sql;
-            } else {
-                sqlOutput.innerHTML = 'No SQL generated';
-            }
-        }
-        
-        function displayStats(data) {
-            document.getElementById('queryCount').textContent = queryCount;
-            document.getElementById('executionTime').textContent = data.execution_time.toFixed(3) + 's';
-            document.getElementById('affectedRows').textContent = data.affected_rows;
-        }
-        
-        function clearInput() {
-            document.getElementById('queryInput').value = '';
-            document.getElementById('output').textContent = 'Results will appear here...';
-            document.getElementById('sqlOutput').textContent = 'Generated SQL will appear here...';
-        }
-        
-        function showExamples() {
-            const examples = document.getElementById('examples');
-            examples.style.display = examples.style.display === 'none' ? 'block' : 'none';
-        }
-        
-        function showTables() {
-            const loading = document.getElementById('loading');
-            const output = document.getElementById('output');
-            
-            loading.style.display = 'block';
-            output.textContent = '';
-            
-            fetch('http://localhost:5000/api/tables')
-            .then(response => response.json())
-            .then(data => {
-                loading.style.display = 'none';
-                let html = '<strong>📋 Database Tables:</strong><br><br>';
-                html += '<small>Click on a table name to view its contents</small><br><br>';
-                
-                if (data.success && data.tables && data.tables.length > 0) {
-                    data.tables.forEach(table => {
-                        html += `<span class="example-item" onclick="showTableContents('${table}')" style="display: inline-block; padding: 8px 12px; margin: 4px;">🗂️ ${table}</span><br>`;
-                    });
-                    html += `<br><small>Total tables: ${data.tables.length}</small>`;
-                } else if (data.success && (!data.tables || data.tables.length === 0)) {
-                    html += 'No tables found. Create a table first!<br><br>';
-                    html += '<small>Try: banaye table students (id number, name text);</small>';
-                } else {
-                    html += '<span class="error">Error fetching tables</span>';
-                    if (data.error) {
-                        html += `<br><small>${data.error}</small>`;
-                    }
-                }
-                
-                output.innerHTML = html;
-            })
-            .catch(error => {
-                loading.style.display = 'none';
-                output.innerHTML = '<span class="error">Network Error: Could not connect to server</span><br>';
-                output.innerHTML += '<small>Make sure the backend is running on port 5000</small>';
-                console.error('Error fetching tables:', error);
-            });
-        }
-        
-        function showTableContents(tableName) {
-            const loading = document.getElementById('loading');
-            const output = document.getElementById('output');
-            
-            loading.style.display = 'block';
-            output.textContent = '';
-            
-            const selectQuery = 'laye * se ' + tableName + ';';
-            
-            fetch('http://localhost:5000/api/compile', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ query: selectQuery })
-            })
-            .then(response => response.json())
-            .then(data => {
-                loading.style.display = 'none';
-                let html = `<strong>📊 Table: ${tableName}</strong><br><br>`;
-                
-                if (data.success && data.results && data.results.length > 0) {
-                    const result = data.results[0];
-                    
-                    if (result.data && result.data.length > 0) {
-                        html += '<table class="result-table">';
-                        html += '<tr>';
-                        result.columns.forEach(col => {
-                            html += '<th>' + col + '</th>';
-                        });
-                        html += '</tr>';
-                        
-                        result.data.forEach(row => {
-                            html += '<tr>';
-                            result.columns.forEach(col => {
-                                html += '<td>' + (row[col] || '') + '</td>';
-                            });
-                            html += '</tr>';
-                        });
-                        html += '</table>';
-                        html += '<small>Rows: ' + result.row_count + '</small>';
-                    } else {
-                        html += '<em>Table is empty</em>';
-                    }
-                } else {
-                    html += '<span class="error">Error fetching table contents</span>';
-                    if (data.errors && data.errors.length > 0) {
-                        html += '<br><small>' + data.errors.join('<br>') + '</small>';
-                    }
-                }
-                
-                output.innerHTML = html;
-            })
-            .catch(error => {
-                loading.style.display = 'none';
-                output.innerHTML = '<span class="error">Network Error: Could not fetch table contents</span>';
-                console.error('Error fetching table contents:', error);
-            });
-        }
-        
-        function setExample(query) {
-            document.getElementById('queryInput').value = query;
-        }
-        
-        function showTab(tabName) {
-            // Hide all tabs
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            // Show selected tab
-            document.getElementById(tabName + 'Tab').classList.add('active');
-            event.target.classList.add('active');
-        }
-        
-        // Keyboard shortcuts
-        document.getElementById('queryInput').addEventListener('keydown', function(e) {
-            if (e.ctrlKey && e.key === 'Enter') {
-                executeQuery();
-            }
+      })
+      .catch(() => {
+        setStatus('error', 'Connection failed');
+        output.innerHTML = '<div class="msg-line msg-err">' + ICONS.x + '<span>Network error: could not reach the BhashaQL server.</span></div>' +
+          '<div class="msg-line" style="color:var(--text-low)">Make sure the backend is running on port 5000.</div>';
+      });
+  }
+
+  // ---------- render helpers ----------
+  function displayResults(data){
+    const output = document.getElementById('output');
+    let html = '';
+
+    if (data.success){
+      html += '<div class="msg-line msg-ok">' + ICONS.check + '<span>' + escapeHtml(data.message) + '</span></div>';
+
+      if (data.results && data.results.length > 0){
+        data.results.forEach((result, i) => {
+          html += '<div class="result-block"><div class="label">Query ' + (i + 1) + ' — ' + escapeHtml(result.message) + '</div>';
+          if (result.data && result.data.length > 0){
+            html += renderResultTable(result);
+          } else {
+            html += '<span class="row-count">Affected rows: ' + (result.affected_rows ?? 0) + '</span>';
+          }
+          html += '</div>';
         });
-    </script>
+      }
+    } else {
+      html += '<div class="msg-line msg-err">' + ICONS.x + '<span>Query failed</span></div>';
+    }
+
+    if (data.errors && data.errors.length > 0){
+      data.errors.forEach(err => {
+        html += '<div class="msg-line msg-err">' + ICONS.x + '<span>' + escapeHtml(err) + '</span></div>';
+      });
+    }
+
+    if (data.warnings && data.warnings.length > 0){
+      data.warnings.forEach(w => {
+        html += '<div class="msg-line msg-warn">' + ICONS.warn + '<span>' + escapeHtml(w) + '</span></div>';
+      });
+    }
+
+    output.innerHTML = html || '<span class="placeholder">No output.</span>';
+  }
+
+  function displaySQL(data){
+    const sqlOutput = document.getElementById('sqlOutput');
+    if (data.sql_statements && data.sql_statements.length > 0){
+      let html = '<ol>';
+      data.sql_statements.forEach(stmt => {
+        html += '<li>' + escapeHtml(stmt) + ';</li>';
+      });
+      html += '</ol>';
+      sqlOutput.innerHTML = html;
+    } else {
+      sqlOutput.innerHTML = '<span class="placeholder">No SQL generated.</span>';
+    }
+  }
+
+  function displayStats(data){
+    document.getElementById('queryCount').textContent = queryCount;
+    const time = typeof data.execution_time === 'number' ? data.execution_time : 0;
+    document.getElementById('executionTime').textContent = time.toFixed(3) + 's';
+    document.getElementById('affectedRows').textContent = data.affected_rows ?? 0;
+    document.getElementById('statusQueries').textContent = queryCount + ' quer' + (queryCount === 1 ? 'y' : 'ies') + ' run';
+    document.getElementById('statusTime').textContent = time.toFixed(3) + 's';
+  }
+
+  function clearInput(){
+    queryInput.value = '';
+    document.getElementById('output').innerHTML = '<span class="placeholder">Run a query to see results here.</span>';
+    document.getElementById('sqlOutput').innerHTML = '<span class="placeholder">Compiled SQL will appear here.</span>';
+    syncGutter();
+    syncCursor();
+    setStatus('ready', 'Ready');
+    queryInput.focus();
+  }
+
+  function toggleExamples(){
+    const drawer = document.getElementById('examples');
+    const btn = document.getElementById('examplesToggle');
+    const open = drawer.classList.toggle('open');
+    btn.setAttribute('aria-pressed', String(open));
+    btn.setAttribute('aria-expanded', String(open));
+  }
+
+  function setExample(query){
+    queryInput.value = query;
+    syncGutter();
+    document.getElementById('examples').classList.remove('open');
+    document.getElementById('examplesToggle').setAttribute('aria-pressed', 'false');
+    document.getElementById('examplesToggle').setAttribute('aria-expanded', 'false');
+    queryInput.focus();
+  }
+
+  function showTab(evt, name){
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', 'false'));
+    document.getElementById(name + 'Tab').classList.add('active');
+    const tabBtn = evt ? evt.currentTarget : document.getElementById('tab-' + name);
+    tabBtn.setAttribute('aria-selected', 'true');
+  }
+</script>
 </body>
 </html>

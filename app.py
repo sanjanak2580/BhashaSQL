@@ -8,6 +8,8 @@ import sys
 import os
 import json
 from typing import Dict, Any, List
+
+from waitress import serve
 from flask import Flask, request, jsonify, render_template_string, send_from_directory
 from flask_cors import CORS
 
@@ -38,7 +40,7 @@ def get_compiler():
     """Get or create compiler instance"""
     global compiler
     if compiler is None:
-        compiler = BhashaQLCompiler("runtime/database.db")
+        compiler = WebBhashaQLCompiler("runtime/database.db")
     return compiler
 
 class WebBhashaQLCompiler:
@@ -871,13 +873,14 @@ def get_stats():
         }), 500
 
 if __name__ == '__main__':
-    # Create runtime directory if it doesn't exist
     os.makedirs('runtime', exist_ok=True)
-    
+
     print("🚀 Starting BhashaQL Web Server...")
     print("📱 Open http://localhost:5000 in your browser")
     print("🔧 API available at http://localhost:5000/api")
     print("📚 Examples at http://localhost:5000/api/examples")
     print("❤️ Health check at http://localhost:5000/api/health")
+
+    serve(app, host='0.0.0.0', port=5000)
+
     
-    app.run(debug=True, host='0.0.0.0', port=5000)
